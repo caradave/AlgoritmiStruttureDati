@@ -105,7 +105,7 @@ void sortByCode(struct Corse *corse, int lenCorse){
 
 	for(int i=0; i<lenCorse; i++){
 		for(int k=0; k<lenCorse; k++){
-			if(strcmp(corseSorted[i]., corseSorted[k])<0){
+			if(strcmp(corseSorted[i].codiceTratta, corseSorted[k].codiceTratta)<0){
 				struct Corse temp = corseSorted[k];
 				corseSorted[k] = corseSorted[i];
 				corseSorted[k] = temp;
