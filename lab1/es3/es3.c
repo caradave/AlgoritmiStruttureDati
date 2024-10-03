@@ -13,8 +13,14 @@ struct Corse{
 };
 
 void output(struct Corse *corse, int lenCorse);
+void printCorse(struct Corse *corse, int lenCorse);
 void sortByDate(struct Corse *corse, int lenCorse);
 void sortByCode(struct Corse *corse, int lencorse);
+struct Corse *sortByStartingStation(struct Corse *corse, int lenCorse, struct Corse *corseSorted);
+void sortByEndingStation(struct Corse *corse, int lenCorse);
+void findByPartial(struct Corse *corse, int lenCorse, char stazioneRicerca[]);
+void findByPartialDicotomic(struct Corse *corse, int lenCorse, char stazioneRicerca[]);
+void findByPartialDicotomicUnwrap(struct Corse *corse, char stazioneRicerca[], int l, int r);
 
 int main(void){
 	FILE *infile = fopen("corse.txt", "r");
@@ -46,24 +52,49 @@ int main(void){
 	return 0;
 }
 
+void printCorse(struct Corse *corse, int lenCorse){
+	for(int i=0; i<lenCorse; i++)
+		printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corse[i].codiceTratta, corse[i].partenza, corse[i].arrivo, corse[i].dd, corse[i].mm, corse[i].yyyy, corse[i].oraPartenza, corse[i].minPartenza, corse[i].secPartenza, corse[i].oraArrivo, corse[i].minArrivo, corse[i].secArrivo, corse[i].ritardo);
+}
+
 void output(struct Corse *corse, int lenCorse){
 	int selezione;
-	printf("1 se si desidera stampare a video i contenuti del file\n2 se si desidera ordinare il vettore di dati per data di partenza (a partità di data, per ora)\n3 se si desidera ordinare il vettore per codice di tratta\n4 se si desidera ordinare il vettore per stazione di partenza\n5 se si desidera ordinare il vettore per stazione di attivo\n6 se si desidera cercare una stazione per nome parziale\nScelta: ");
+	char stazioneRicerca[30];
+	struct Corse *corseSorted = malloc(lenCorse*sizeof(struct Corse));
+	printf("1 se si desidera stampare a video i contenuti del file\n2 se si desidera ordinare il vettore di dati per data di partenza (a partità di data, per ora)\n3 se si desidera ordinare il vettore per codice di tratta\n4 se si desidera ordinare il vettore per stazione di partenza\n5 se si desidera ordinare il vettore per stazione di arrivo\n6 se si desidera cercare una stazione per nome parziale\nScelta: ");
 	scanf("%d", &selezione);
 
 	switch (selezione){
 		case 1:
-			for(int i=0; i<lenCorse; i++){
-				printf("%s %s %s %d/%d/%d %d:%d:%d %d:%d:%d %d\n", corse[i].codiceTratta, corse[i].partenza, corse[i].arrivo, corse[i].dd, corse[i].mm, corse[i].yyyy, corse[i].oraPartenza, corse[i].minPartenza, corse[i].secPartenza, corse[i].oraArrivo, corse[i].minArrivo, corse[i].secArrivo, corse[i].ritardo);
-			}
-		break;
+			printCorse(corse, lenCorse);
+			break;
 		case 2:
 			sortByDate(corse, lenCorse);
 		break;
 		case 3:
 			sortByCode(corse, lenCorse);
 		break;
+		case 4:
+			printCorse(sortByStartingStation(corse, lenCorse, corseSorted), lenCorse);
+		break;
+		case 5:
+			sortByEndingStation(corse, lenCorse);
+		break;
+		case 6:
+			printf("inserire il nome, anche parziale: ");
+			scanf("%s", stazioneRicerca);
+			findByPartial(sortByStartingStation(corse, lenCorse, corseSorted), lenCorse, stazioneRicerca);
+		break;
+		case 7:
+			printf("inserire il nome, anche parziale: ");
+			scanf("%s", stazioneRicerca);
+			findByPartialDicotomic(sortByStartingStation(corse, lenCorse, corseSorted), lenCorse, stazioneRicerca);
+		break;
+		default:
+			printf("non è stato inserito un comando valido");
+		break;
 	}
+	free(corseSorted);
 }
 
 void sortByDate(struct Corse *corse, int lenCorse){
@@ -93,12 +124,12 @@ void sortByDate(struct Corse *corse, int lenCorse){
 			}
 		}
 	}
-	for(int i=0; i<lenCorse; i++)
-		printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corseSorted[i].codiceTratta, corseSorted[i].partenza, corseSorted[i].arrivo, corseSorted[i].dd, corseSorted[i].mm, corseSorted[i].yyyy, corseSorted[i].oraPartenza, corseSorted[i].minPartenza, corseSorted[i].secPartenza, corseSorted[i].oraArrivo, corseSorted[i].minArrivo, corseSorted[i].secArrivo, corseSorted[i].ritardo);
+	printCorse(corseSorted, lenCorse);
+	free(corseSorted);
 }
 
 void sortByCode(struct Corse *corse, int lenCorse){
-	struct Corse *corseSorted = malloc(lenCorse*sizeof(lenCorse));
+	struct Corse *corseSorted = malloc(lenCorse*sizeof(struct Corse));
 
 	for(int i=0; i<lenCorse; i++)
 		corseSorted[i] = corse[i];
@@ -108,11 +139,71 @@ void sortByCode(struct Corse *corse, int lenCorse){
 			if(strcmp(corseSorted[i].codiceTratta, corseSorted[k].codiceTratta)<0){
 				struct Corse temp = corseSorted[k];
 				corseSorted[k] = corseSorted[i];
-				corseSorted[k] = temp;
+				corseSorted[i] = temp;
 			}
 		}
 	}
+	printCorse(corseSorted, lenCorse);
+	free(corseSorted);
+}
+
+struct Corse *sortByStartingStation(struct Corse *corse, int lenCorse, struct Corse *corseSorted){
+
 	for(int i=0; i<lenCorse; i++)
-		printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corseSorted[i].codiceTratta, corseSorted[i].partenza, corseSorted[i].arrivo, corseSorted[i].dd, corseSorted[i].mm, corseSorted[i].yyyy, corseSorted[i].oraPartenza, corseSorted[i].minPartenza, corseSorted[i].secPartenza, corseSorted[i].oraArrivo, corseSorted[i].minArrivo, corseSorted[i].secArrivo, corseSorted[i].ritardo);	
-	
+		corseSorted[i] = corse[i];
+
+	for(int i=0; i<lenCorse; i++){
+		for(int k=0; k<lenCorse; k++){
+			if(strcmp(corseSorted[i].partenza, corseSorted[k].partenza)<0){
+				struct Corse temp = corseSorted[k];
+				corseSorted[k] = corseSorted[i];
+				corseSorted[i] = temp;
+			}
+		}
+	}
+	return corseSorted;
+}
+
+void sortByEndingStation(struct Corse *corse, int lenCorse){
+	struct Corse *corseSorted = malloc(lenCorse*sizeof(struct Corse));
+
+	for(int i=0; i<lenCorse; i++)
+		corseSorted[i] = corse[i];
+
+	for(int i=0; i<lenCorse; i++){
+		for(int k=0; k<lenCorse; k++){
+			if(strcmp(corseSorted[i].arrivo, corseSorted[k].arrivo)<0){
+				struct Corse temp = corseSorted[k];
+				corseSorted[k] = corseSorted[i];
+				corseSorted[i] = temp;
+			}
+		}
+	}
+	printCorse(corseSorted, lenCorse);
+	free(corseSorted);
+}
+
+void findByPartial(struct Corse *corse, int lenCorse, char stazioneRicerca[]){
+	int lenStazione = strlen(stazioneRicerca);
+	for(int i=0; i<lenCorse; i++){
+		if(strncmp(corse[i].partenza, stazioneRicerca, lenStazione) == 0)
+			printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corse[i].codiceTratta, corse[i].partenza, corse[i].arrivo, corse[i].dd, corse[i].mm, corse[i].yyyy, corse[i].oraPartenza, corse[i].minPartenza, corse[i].secPartenza, corse[i].oraArrivo, corse[i].minArrivo, corse[i].secArrivo, corse[i].ritardo);
+	}
+}
+
+void findByPartialDicotomic(struct Corse *corse, int lenCorse, char stazioneRicerca[]){
+	findByPartialDicotomicUnwrap(corse, stazioneRicerca, 0, lenCorse-1);
+}
+
+void findByPartialDicotomicUnwrap(struct Corse *corse, char stazioneRicerca[], int l, int r){
+	if(l >= r){
+		if(strncmp(corse[l].partenza, stazioneRicerca, strlen(stazioneRicerca)) == 0){
+			printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corse[l].codiceTratta, corse[l].partenza, corse[l].arrivo, corse[l].dd, corse[l].mm, corse[l].yyyy, corse[l].oraPartenza, corse[l].minPartenza, corse[l].secPartenza, corse[l].oraArrivo, corse[l].minArrivo, corse[l].secArrivo, corse[l].ritardo);
+		}
+		return;
+	}
+	int m=(r+l)/2;
+	findByPartialDicotomicUnwrap(corse, stazioneRicerca, l, m);
+	findByPartialDicotomicUnwrap(corse, stazioneRicerca, m+1, r);
+	return;
 }
