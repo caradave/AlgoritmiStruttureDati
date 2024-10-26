@@ -20,7 +20,9 @@ int main(void){
 	char sol[*lenFile][255];
 
 	princ_molt(0, persone, sol, *lenFile);
-
+	
+	free(persone);
+	free(lenFile);
 	fclose(infile);
 	return 0;
 }
@@ -54,7 +56,7 @@ void princ_molt(int pos, struct Persona *val, char sol[][255], int n) {
 	}
 	
 	for (i = 0; i < val[pos].numCanzoni; i++) {
-	strcpy(sol[pos], val[pos].canzoni[i]);
+		strcpy(sol[pos], val[pos].canzoni[i]);
 		princ_molt(pos+1, val, sol, n);
 	}
 	return;
