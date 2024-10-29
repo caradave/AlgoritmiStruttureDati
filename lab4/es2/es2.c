@@ -9,7 +9,7 @@ struct Data{
 
 struct Persona{
 	struct Data nascita;
-	char nome[maxC], cognome[maxC], via[maxC], citta[maxC];
+	char codice[maxC], nome[maxC], cognome[maxC], via[maxC], citta[maxC];
 	int cap;
 };
 
@@ -20,17 +20,26 @@ struct Node{
 };
 
 struct Node *newNode(struct Node *node, struct Persona persona);
-void readFile(FILE *infile, struct Node *node);
-
+struct Node *readFile(FILE *infile, struct Node *head);
+void freeList(struct Node *head);
+void printList(struct Node *head);
+struct Node *sortList(struct Node *head);
 
 int main(void){
-	FILE *infile = fopen("anag1.txt", "r");
 	struct Node *head = malloc(sizeof(struct Node));
+	FILE *infile = fopen("anag1.txt", "r");
+	
+	if(infile == NULL){
+		printf("impossibile aprire il file");
+		return -1;
+	}
 
-	readFile(infile, head);
 
+	head = readFile(infile, head);
+	printList(head);
 
 	fclose(infile);
+	freeList(head);
 	return 0;
 }
 
@@ -45,5 +54,31 @@ struct Node *newNode(struct Node *node, struct Persona persona){
 	return x;
 }
 
+void printList(struct Node *head){
+	struct Node *node = head;
+	while(node -> next != NULL){
+		printf( "%s %s %s %d/%d/%d %s %s %d\n", node->persona.codice, node->persona.nome, node->persona.cognome, node->persona.nascita.giorno, node->persona.nascita.mese, node->persona.nascita.anno, node->persona.via, node->persona.citta, node->persona.cap);
+		node = node->next;
+	}
+}
 
-void readFile(FILE *infile, struct Node *node);
+struct Node *readFile(FILE *infile, struct Node *head){
+	struct Persona persona;
+	while((fscanf(infile, "%s %s %s %d/%d/%d %s %s %d", persona.codice, persona.nome, persona.cognome, &persona.nascita.giorno, &persona.nascita.mese, &persona.nascita.anno, persona.via, persona.citta, &persona.cap)) != EOF){
+	//	printf("%s %s %s %d/%d/%d %s %s %d", persona.codice, persona.nome, persona.cognome, persona.nascita.giorno, persona.nascita.mese, persona.nascita.anno, persona.via, persona.citta, persona.cap);
+		head = newNode(head, persona);
+	}
+	return head;
+}
+
+void freeList(struct Node *head){
+	if(head->next != NULL){
+		freeList(head->next);
+	}
+	free(head);
+	return;
+}
+
+struct Node *sortList(struct Node *head){
+	
+}
