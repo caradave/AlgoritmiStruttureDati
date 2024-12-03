@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int powerset_disp_rip(int pos, int *val, int *sol, int n, int count);
+void powerset_disp_rip(int pos, int *val, int *sol, int n);
 int checkCorrect(int *sol, int lenSol);
 
 int main(void){
@@ -31,26 +31,25 @@ int main(void){
 	return 0;
 }
 
-int powerset_disp_rip(int pos, int *val, int *sol, int n, int count) {
+void powerset_disp_rip(int pos, int *val, int *sol, int n) {
 	int i;
 	// stampa del vettore
-	if (pos >= n) {
-	printf("{ ");
-	for (i=0; i<n; i++)
-		if (sol[i]!=0)
-			printf("%d ", val[i]);
-	printf("} \n");
-	return count+1;
+	if (pos >= n){
+		printf("{ ");
+		for (i=0; i<n; i++)
+			if (sol[i]!=0)
+				printf("%d ", val[i]);
+		printf("} \n");
+		return;
 	}
-	
 	// prendo un elemento e lo blocco
 	sol[pos] = 0;
-	count = powerset_disp_rip(pos+1, val, sol, n, count);
+	powerset_disp_rip(pos+1, val, sol, n);
 	// sblocco l'elemento che ho preso, prendendo l'elemento successivo
 	sol[pos] = 1;
-	count = powerset_disp_rip(pos+1, val, sol, n, count);
+	powerset_disp_rip(pos+1, val, sol, n);
 	// ritorno
-	return count;
+	return;
 }
 
 
@@ -69,3 +68,8 @@ int checkCorrect(int *sol, int lenSol){
 	}
 	return check;
 }
+
+
+
+
+
