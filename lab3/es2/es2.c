@@ -2,62 +2,82 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAXNUM 5
+#define MAXLEN 255
 
-struct Persona{
-	char canzoni[5][255];
-	int numCanzoni;
-};
+typedef struct Brani{
+  char brani[MAXNUM][MAXLEN];
+} Brani;
 
-struct Persona *leggiFile(struct Persona *persone, FILE *infile, int *lenFile);
-void princ_molt(int pos, struct Persona *val, char sol[][255], int n);
+typedef struct Amico{
+  int numeroBrani;
+  struct Brani brani;
+} Amico;
 
+void readFile(FILE *infile, int lenFile, struct Amico *amici);
+void combinazioniR(struct Amico *amici, char **sol, int lenFile, int posAmico, int posCanzone, int posSol);
+void combinazioni(struct Amico *amici, int lenFile);
+void printSol(char **sol, int lenSol);
 
 int main(void){
-	FILE *infile = fopen("brani.txt", "r");
-	int *lenFile = malloc(sizeof(int));
-	struct Persona *persone = leggiFile(persone, infile, lenFile);
-	
-	char sol[*lenFile][255];
+  FILE *infile = fopen("brani.txt", "r");
+  
+  if(infile == NULL){
+    printf("impossibile aprire il file");
+    return -1;
+  }
 
-	princ_molt(0, persone, sol, *lenFile);
-	
-	free(persone);
-	free(lenFile);
-	fclose(infile);
-	return 0;
+  int lenFile;
+  fscanf(infile, "%d\n", &lenFile);
+  
+  struct Amico *amici = malloc(lenFile*sizeof(struct Amico));
+  readFile(infile, lenFile, amici);
+
+  combinazioni(amici, lenFile);
+
+  free(amici);
+  return 0;
 }
 
-struct Persona *leggiFile(struct Persona *persone, FILE *infile, int *lenFile){
-	int numCanzoni;
-	char canzone[255];
-
-	fscanf(infile, "%d\n", lenFile);
-	persone = (struct Persona *)malloc(*lenFile * sizeof(struct Persona));
-	
-	for(int i=0; i<*lenFile; i++){
-		fscanf(infile, "%d\n", &numCanzoni);
-		persone[i].numCanzoni = numCanzoni;
-		for(int k=0; k<numCanzoni; k++){
-			fscanf(infile, "%s", canzone);
-			strcpy(persone[i].canzoni[k], canzone);
-		}
-	}
-
-	return persone;
+void readFile(FILE *infile, int lenFile, struct Amico *amici){
+  for(int i=0; i<lenFile; i++){
+    fscanf(infile, "%d\n", &amici[i].numeroBrani);
+    for(int k=0; k<amici[i].numeroBrani; k++){
+      fscanf(infile, "%s\n", amici[i].brani.brani[k]);
+      //printf("%s\n", amici[i].brani.brani[i]);
+    }
+  } 
 }
 
-void princ_molt(int pos, struct Persona *val, char sol[][255], int n) {
-	int i;
-	if (pos >= n) {
-		for (i = 0; i < n; i++)
-			printf("%s ", sol[i]);
-		printf("\n");
-		return;
-	}
-	
-	for (i = 0; i < val[pos].numCanzoni; i++) {
-		strcpy(sol[pos], val[pos].canzoni[i]);
-		princ_molt(pos+1, val, sol, n);
-	}
-	return;
+void combinazioni(struct Amico *amici, int lenFile){
+  char **sol = malloc(lenFile*sizeof(char *));
+  for(int i=0; i<lenFile; i++)
+    sol[i] = malloc(MAXLEN*sizeof(char));
+
+  int posAmico=0, posCanzone=0;
+
+  combinazioniR(amici,sol, lenFile, posAmico, posCanzone, 0);
+
+  //for(int i=0; i<lenFile; i++)
+  //  free(sol[i]);
+  //free(sol);
+}
+
+void printSol(char **sol, int lenSol){
+  for(int i=0; i<lenSol; i++)
+    printf("%s ", sol[i]);
+  printf("\n");
+}
+
+void combinazioniR(struct Amico *amici, char **sol, int lenFile, int posAmico, int posCanzone, int posSol){
+  if(posAmico == lenFile){
+    printSol(sol, lenFile);
+    return;
+  }
+  
+  for(int i=0; i<amici[posAmico].numeroBrani; i++){
+    sol[posAmico] = amici[posAmico].brani.brani[i];
+    combinazioniR(amici, sol, lenFile, posAmico+1, posCanzone, posSol);
+  }
+  return;
 }

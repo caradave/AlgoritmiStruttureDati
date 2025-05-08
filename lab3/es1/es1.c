@@ -1,50 +1,72 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int maggioritario(int vett[], int lenVett);
-int maggioritarioUnwrapped(int vett[], int l, int r);
-int checkMaggioritario(int vett[], int maybeMaggR, int maybeMaggL, int l, int r);
+int majority(int *vet, int len);
+int majorityR(int *vet, int l, int r, int element);
+int checkEffectiveMajo(int *vet, int l, int r, int element);
 
 int main(void){
-	int vett[11] = {1, 7, 1, 4, 1, 6, 1, 8, 1, 10, 1};
-	maggioritario(vett, 11);
+  FILE *infile = fopen("test.txt", "r");
+  
+  char string[30];
+  int *vet = malloc(10*sizeof(int));
+  
+  if(infile == NULL){
+    printf("impossibile aprire il file");
+    return -1;
+  }
+
+  while(fscanf(infile, "%s\n", string) == 1){
+    sscanf(string, "%d,%d,%d,%d,%d,%d,%d\n", &vet[0], &vet[1], &vet[2], &vet[3], &vet[4], &vet[5], &vet[6]);
+    printf("%d, %d, %d, %d, %d, %d, %d. maggioritario: ", vet[0], vet[1], vet[2], vet[3], vet[4], vet[5], vet[6]);
+    printf("%d \n", majority(vet, 7));
+  }
+
+  
+  free(vet);
+  fclose(infile);
+  return 0;
 }
 
-int maggioritario(int vett[], int lenVett){
-	printf("%d\n", maggioritarioUnwrapped(vett, 0, lenVett-1));
-	return -1;
+
+int majority(int *vet, int len){
+  
+  return majorityR(vet, 0, len-1, -1);
+
 }
 
-int maggioritarioUnwrapped(int vett[], int l, int r){
-	if(l>=r){
-		return vett[l];
-	}
-	int m = (l+r)/2;
-	int intL, intR;
-	intL = maggioritarioUnwrapped(vett, l, m);
-	intR = maggioritarioUnwrapped(vett, m+1, r);
-	return checkMaggioritario(vett, intL, intR, l, r);
+
+int majorityR(int *vet, int l, int r, int element){
+  if(l == r){
+    return vet[l];
+  }
+  
+  int mid = (l+r)/2;
+
+  int left = majorityR(vet, l, mid, element);
+  int right = majorityR(vet, mid+1, r, element);
+
+  if(left == right)
+    return right;
+
+  int countLeft = checkEffectiveMajo(vet, l, r, left);
+  int countRight = checkEffectiveMajo(vet, l, r, right);
+
+  if(countLeft > (r-l+1)/2)
+    return left;
+  else if(countRight > (r-l+1)/2)
+    return right;
+  return -1;
 }
 
-int checkMaggioritario(int vett[], int maybeMaggR, int maybeMaggL, int l, int r){
-	int ricorrenzeR=0, ricorrenzeL=0;
-	printf("maybeMaggR: %d, maybeMaggL: %d, left-end: %d, right-end: %d\n", maybeMaggL, maybeMaggR, l, r);
-	if(maybeMaggL == maybeMaggR)
-		return maybeMaggR;
+int checkEffectiveMajo(int *vet, int l, int r, int element){
+  int occurences = 0;
 
-	for(int i=l; i<r+1; i++){
-		if(vett[i] == maybeMaggR)
-			ricorrenzeR++;
-		if(vett[i] == maybeMaggL)
-			ricorrenzeL++;
-		printf("ciclio: vett[i] %d, ricorrenzeR: %d, ricorrenzeL: %d\n", vett[i], ricorrenzeR, ricorrenzeL);
-	}
-	if(ricorrenzeR > (r+1-l)/2){
-		printf("MaggR: %d, soglia: %d\n", maybeMaggR, (r-l)/2);	
-		return maybeMaggR;
-	}
-	if(ricorrenzeL > (r+1-l)/2){
-		printf("MaggL: %d, soglia: %d\n", maybeMaggL,  (r-l)/2);
-		return maybeMaggL;
-	}
-	return -1;	
+  for(int i=l; i<=r; i++)
+    if(vet[i] == element){
+      occurences++;
+    }
+
+  return occurences;
+
 }

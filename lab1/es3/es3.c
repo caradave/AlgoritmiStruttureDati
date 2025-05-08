@@ -1,209 +1,90 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "corse.h"
 
-struct Corse{
-    char codiceTratta[30];
-    char partenza[30];
-    char arrivo[30];
-    int dd, mm, yyyy;
-    int minPartenza, oraPartenza, secPartenza;
-    int minArrivo, oraArrivo, secArrivo;
-    int ritardo;
-};
+#define MAXC 30
 
-void output(struct Corse *corse, int lenCorse);
-void printCorse(struct Corse *corse, int lenCorse);
-void sortByDate(struct Corse *corse, int lenCorse);
-void sortByCode(struct Corse *corse, int lencorse);
-struct Corse *sortByStartingStation(struct Corse *corse, int lenCorse, struct Corse *corseSorted);
-void sortByEndingStation(struct Corse *corse, int lenCorse);
-void findByPartial(struct Corse *corse, int lenCorse, char stazioneRicerca[]);
-void findByPartialDicotomic(struct Corse *corse, int lenCorse, char stazioneRicerca[]);
-void findByPartialDicotomicUnwrap(struct Corse *corse, char stazioneRicerca[], int l, int r);
+void selectAction(int len, Corse *corse);
+void printData(int len, Corse *corse);
 
 int main(void){
-	FILE *infile = fopen("corse.txt", "r");
-	int lenFile;
+  FILE *infile = fopen("corse.txt", "r");
 
-	if(infile == NULL){
-		printf("errore nell'apetura del file\n");
-		return -1;
-	}
-	
-	fscanf(infile, "%d", &lenFile);
-	struct Corse *corse = malloc(lenFile*sizeof(struct Corse));
+  if(infile == NULL){
+    printf("impossibile aprire il file\n");
+    return -1;
+  }
+  
+  int lenFile;
+  fscanf(infile, "%d", &lenFile);
+  
+  Corse *corse;
+  corse = readFile(infile, lenFile, corse);
+//  printDataStructureCorse(lenFile, corse); 
+  selectAction(lenFile, corse);
 
-	for(int i=0; i<lenFile; i++){
-		fscanf(infile, "%s %s %s %d/%d/%d %d:%d:%d %d:%d:%d %d", 
-		corse[i].codiceTratta, 
-		corse[i].partenza, 
-		corse[i].arrivo, 
-		&corse[i].yyyy, &corse[i].mm, &corse[i].dd, 
-		&corse[i].oraPartenza, &corse[i].minPartenza, &corse[i].secPartenza, 
-		&corse[i].oraArrivo, &corse[i].minArrivo, &corse[i].secArrivo,
-		&corse[i].ritardo);
-	//        printf("%s %s %s %d/%d/%d %d:%d:%d %d:%d:%d %d\n", corse[i].codiceTratta, corse[i].partenza, corse[i].arrivo, corse[i].dd, corse[i].mm, corse[i].yyyy, corse[i].oraPartenza, corse[i].minPartenza, corse[i].secPartenza, corse[i].oraArrivo, corse[i].minArrivo, corse[i].secArrivo, corse[i].ritardo);
-	}
-	output(corse, lenFile);
-	free(corse);
-	fclose(infile);
-
-	return 0;
+  fclose(infile);
+  return 0;
 }
 
-void printCorse(struct Corse *corse, int lenCorse){
-	for(int i=0; i<lenCorse; i++)
-		printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corse[i].codiceTratta, corse[i].partenza, corse[i].arrivo, corse[i].dd, corse[i].mm, corse[i].yyyy, corse[i].oraPartenza, corse[i].minPartenza, corse[i].secPartenza, corse[i].oraArrivo, corse[i].minArrivo, corse[i].secArrivo, corse[i].ritardo);
+void selectAction(int len, Corse *corse){
+  
+  printf("1) stampa a video o su file del contenuto del log\n2) ordinamento del vettore per data\n3) ordinamento del vettore per codice di tratta\n4) ordinamento del vettore per per stazione di partenza\n5) ordinamento del vettore per stazione di arrivo\n6) ricerda di una tratta per stazione di arrivo (anche parziale)\n");
+  int scelta;
+  scanf("%d", &scelta);
+
+  switch (scelta){
+    case 1:
+      printData(len, corse); 
+    break;
+    case 2:
+      corse = corseSortedByDate(len, corse);
+      printDataStructureCorse(len, corse);
+    break;
+    case 3:
+      corse = corseSortedByCod(len, corse);
+      printDataStructureCorse(len, corse);
+    break;
+    case 4:
+      corse = corseSortedByStartingStation(len, corse);
+      printDataStructureCorse(len, corse);
+    break;
+    case 5:
+      corse = corseSortedByEndingStation(len, corse);
+      printDataStructureCorse(len, corse);
+    break;
+    case 6:
+      corse = corseFoundByStart(len, corse);
+    break;
+    default:
+      printf("impossibile eseguire");
+      return;
+    break;
+  }
 }
 
-void output(struct Corse *corse, int lenCorse){
-	int selezione;
-	char stazioneRicerca[30];
-	struct Corse *corseSorted = malloc(lenCorse*sizeof(struct Corse));
-	printf("1 se si desidera stampare a video i contenuti del file\n2 se si desidera ordinare il vettore di dati per data di partenza (a partità di data, per ora)\n3 se si desidera ordinare il vettore per codice di tratta\n4 se si desidera ordinare il vettore per stazione di partenza\n5 se si desidera ordinare il vettore per stazione di arrivo\n6 se si desidera cercare una stazione per nome parziale\nScelta: ");
-	scanf("%d", &selezione);
 
-	switch (selezione){
-		case 1:
-			printCorse(corse, lenCorse);
-			break;
-		case 2:
-			sortByDate(corse, lenCorse);
-		break;
-		case 3:
-			sortByCode(corse, lenCorse);
-		break;
-		case 4:
-			printCorse(sortByStartingStation(corse, lenCorse, corseSorted), lenCorse);
-		break;
-		case 5:
-			sortByEndingStation(corse, lenCorse);
-		break;
-		case 6:
-			printf("inserire il nome, anche parziale: ");
-			scanf("%s", stazioneRicerca);
-			findByPartial(sortByStartingStation(corse, lenCorse, corseSorted), lenCorse, stazioneRicerca);
-		break;
-		case 7:
-			printf("inserire il nome, anche parziale: ");
-			scanf("%s", stazioneRicerca);
-			findByPartialDicotomic(sortByStartingStation(corse, lenCorse, corseSorted), lenCorse, stazioneRicerca);
-		break;
-		default:
-			printf("non è stato inserito un comando valido");
-		break;
-	}
-	free(corseSorted);
-}
+void printData(int len, Corse *corse){
+  int scelta;
 
-void sortByDate(struct Corse *corse, int lenCorse){
-	struct Corse *corseSorted = malloc(lenCorse*sizeof(struct Corse));
-	struct Corse temp;
-	char iDate[10], kDate[10], iHour[10], kHour[10];
-	
-	for(int i=0; i<lenCorse; i++)
-		corseSorted[i] = corse[i];
+  printf("1) se si desidera stampare il file a video\n2) se si desidera stampare su un file\n");
+  scanf("%d", &scelta);
 
-	for(int i=0; i<lenCorse; i++){
-		sprintf(iDate, "%02d%02d%02d", corseSorted[i].yyyy, corseSorted[i].mm, corseSorted[i].dd);
-		sprintf(iHour, "%02d%02d%02d", corseSorted[i].oraPartenza, corseSorted[i].minPartenza, corseSorted[i].secPartenza);
-		for(int k=0; k<lenCorse; k++){
-			sprintf(kDate, "%02d%02d%02d", corseSorted[k].yyyy, corseSorted[k].mm, corseSorted[k].dd);
-			sprintf(kHour, "%02d%02d%02d", corseSorted[k].oraPartenza, corseSorted[k].minPartenza, corseSorted[k].secPartenza);
-			if(strcmp(iDate, kDate) < 0){
-				temp = corseSorted[k];
-				corseSorted[k] = corseSorted[i];
-				corseSorted[i] = temp;
-			}else if(strcmp(iDate, kDate) == 0){
-				if(strcmp(iHour, kHour) < 0){
-					temp = corseSorted[k];
-					corseSorted[k] = corseSorted[i];
-					corseSorted[i] = temp;
-				}
-			}
-		}
-	}
-	printCorse(corseSorted, lenCorse);
-	free(corseSorted);
-}
+  if(scelta == 1){
+    printDataStructureCorse(len, corse);
+  }else{
+    char fileName[MAXC];
+    FILE *outFile;
 
-void sortByCode(struct Corse *corse, int lenCorse){
-	struct Corse *corseSorted = malloc(lenCorse*sizeof(struct Corse));
+    printf("inserire il nome del file: ");
+    scanf("%s", fileName);
 
-	for(int i=0; i<lenCorse; i++)
-		corseSorted[i] = corse[i];
+    outFile = fopen(fileName, "w");
 
-	for(int i=0; i<lenCorse; i++){
-		for(int k=0; k<lenCorse; k++){
-			if(strcmp(corseSorted[i].codiceTratta, corseSorted[k].codiceTratta)<0){
-				struct Corse temp = corseSorted[k];
-				corseSorted[k] = corseSorted[i];
-				corseSorted[i] = temp;
-			}
-		}
-	}
-	printCorse(corseSorted, lenCorse);
-	free(corseSorted);
-}
-
-struct Corse *sortByStartingStation(struct Corse *corse, int lenCorse, struct Corse *corseSorted){
-
-	for(int i=0; i<lenCorse; i++)
-		corseSorted[i] = corse[i];
-
-	for(int i=0; i<lenCorse; i++){
-		for(int k=0; k<lenCorse; k++){
-			if(strcmp(corseSorted[i].partenza, corseSorted[k].partenza)<0){
-				struct Corse temp = corseSorted[k];
-				corseSorted[k] = corseSorted[i];
-				corseSorted[i] = temp;
-			}
-		}
-	}
-	return corseSorted;
-}
-
-void sortByEndingStation(struct Corse *corse, int lenCorse){
-	struct Corse *corseSorted = malloc(lenCorse*sizeof(struct Corse));
-
-	for(int i=0; i<lenCorse; i++)
-		corseSorted[i] = corse[i];
-
-	for(int i=0; i<lenCorse; i++){
-		for(int k=0; k<lenCorse; k++){
-			if(strcmp(corseSorted[i].arrivo, corseSorted[k].arrivo)<0){
-				struct Corse temp = corseSorted[k];
-				corseSorted[k] = corseSorted[i];
-				corseSorted[i] = temp;
-			}
-		}
-	}
-	printCorse(corseSorted, lenCorse);
-	free(corseSorted);
-}
-
-void findByPartial(struct Corse *corse, int lenCorse, char stazioneRicerca[]){
-	int lenStazione = strlen(stazioneRicerca);
-	for(int i=0; i<lenCorse; i++){
-		if(strncmp(corse[i].partenza, stazioneRicerca, lenStazione) == 0)
-			printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corse[i].codiceTratta, corse[i].partenza, corse[i].arrivo, corse[i].dd, corse[i].mm, corse[i].yyyy, corse[i].oraPartenza, corse[i].minPartenza, corse[i].secPartenza, corse[i].oraArrivo, corse[i].minArrivo, corse[i].secArrivo, corse[i].ritardo);
-	}
-}
-
-void findByPartialDicotomic(struct Corse *corse, int lenCorse, char stazioneRicerca[]){
-	findByPartialDicotomicUnwrap(corse, stazioneRicerca, 0, lenCorse-1);
-}
-
-void findByPartialDicotomicUnwrap(struct Corse *corse, char stazioneRicerca[], int l, int r){
-	if(l >= r){
-		if(strncmp(corse[l].partenza, stazioneRicerca, strlen(stazioneRicerca)) == 0){
-			printf("%s %s %s %02d/%02d/%02d %02d:%02d:%02d %02d:%02d:%02d %d\n", corse[l].codiceTratta, corse[l].partenza, corse[l].arrivo, corse[l].dd, corse[l].mm, corse[l].yyyy, corse[l].oraPartenza, corse[l].minPartenza, corse[l].secPartenza, corse[l].oraArrivo, corse[l].minArrivo, corse[l].secArrivo, corse[l].ritardo);
-		}
-		return;
-	}
-	int m=(r+l)/2;
-	findByPartialDicotomicUnwrap(corse, stazioneRicerca, l, m);
-	findByPartialDicotomicUnwrap(corse, stazioneRicerca, m+1, r);
-	return;
+    if(outFile == NULL)
+      printf("impossibile aprire il file");
+    else
+      printOnFile(len, outFile, corse);
+    
+    fclose(outFile);
+  }
 }
