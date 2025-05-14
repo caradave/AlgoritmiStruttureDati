@@ -1,7 +1,6 @@
 #include "date.h"
 
 int compareDate(Date d1, Date d2){
-  
   if((d1.yy*10000 + d1.mm*100 + d1.dd) > (d2.yy*10000 + d2.mm*100 + d2.dd))
     return 1;
   else
