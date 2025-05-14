@@ -32,6 +32,9 @@ int main(void){
   int finalSolLen = powerset_div_conq(0, att, sol, fileLen, 0, finalSol, 0);
   printAtt(finalSol, finalSolLen);
 
+  free(att);
+  free(sol);
+  free(finalSol);
   fclose(infile);
   return 0;
 }

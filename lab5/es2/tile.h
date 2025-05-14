@@ -6,6 +6,10 @@
 
 typedef struct Tile Tile;
 struct Tile *createTile(char c1, int v1, char c2, int v2);
-void printTile(struct Tile *t);
+  void ReadTile(FILE *infile, Tile **t, int len);
+void printTile(struct Tile *t, int rot);
+void printTiles(Tile **t, int len);
+void freeTile(struct Tile *t);
+void freeTiles(struct Tile **t, int len);
 
 #endif
