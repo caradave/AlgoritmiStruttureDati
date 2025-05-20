@@ -8,6 +8,7 @@ typedef struct Exercise{
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 struct Exercise **readFile(FILE *infile, struct Exercise **e, int lenFile){
   *e = malloc(lenFile*sizeof(struct Exercise));
 
@@ -17,6 +18,8 @@ struct Exercise **readFile(FILE *infile, struct Exercise **e, int lenFile){
     strcpy(e[i]->name, name);
   }
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 struct Exercise *createExercise(char *name, int type, int entry, int out, int prec, int final, int diff, float val){
@@ -31,6 +34,9 @@ struct Exercise *createExercise(char *name, int type, int entry, int out, int pr
   e->diff = diff;
   e->val = val;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -38,6 +44,7 @@ struct Exercise *createExercise(char *name, int type, int entry, int out, int pr
   return e;
 }
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 void printExercise(struct Exercise *e){
@@ -56,6 +63,8 @@ int getOut(struct Exercise *e){
   return e->out;
 }
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 struct Exercise **readFile(FILE *infile, int lenFile){
@@ -129,6 +138,9 @@ int countMinDiffDiag(Exercise **e, int len){
   return sum;
 }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
