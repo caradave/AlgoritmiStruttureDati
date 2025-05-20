@@ -2,8 +2,13 @@
 #define ESERCIZIO_H
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 #include <stdlib.h>
 #include <stdio.h>
+=======
+#include <stdio.h>
+#include <stdlib.h>
+>>>>>>> Stashed changes
 =======
 #include <stdio.h>
 #include <stdlib.h>
