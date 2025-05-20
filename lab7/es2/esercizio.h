@@ -1,23 +1,8 @@
 #ifndef ESERCIZIO_H
 #define ESERCIZIO_H
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-#include <stdlib.h>
-#include <stdio.h>
-=======
 #include <stdio.h>
 #include <stdlib.h>
->>>>>>> Stashed changes
-=======
-#include <stdio.h>
-#include <stdlib.h>
->>>>>>> Stashed changes
-=======
-#include <stdio.h>
-#include <stdlib.h>
->>>>>>> Stashed changes
 #include <string.h>
 
 typedef struct Exercise Exercise;
