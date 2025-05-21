@@ -16,6 +16,9 @@ int getOut(Exercise *e);
 int getDifficulty(Exercise *e);
 int getAcro(Exercise *e);
 int checkAcro(Exercise **e, int len);
-int countMinDiffDiag(Exercise **e, int len);
+int countDiffDiag(Exercise **e, int len);
+float getValue(Exercise *e);
+int getFinal(struct Exercise *e);
+int getPrec(struct Exercise *e);
 
 #endif

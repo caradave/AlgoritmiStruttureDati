@@ -2,24 +2,16 @@
 #include <stdlib.h>
 
 #include "esercizio.h"
+#include "list.h"
 
 #define DD 10
-#define DG 20
+#define DP 20
+#define LEND 3
 
-typedef struct Node{
-  Exercise **e;
-  int lenE;
-  int minDiff;
-  struct Node *next;
-} Node;
 
-struct Node *newNode(Exercise **e, int lenE, struct Node *h);
-struct Node *powerset_div_conq(int pos, Exercise **val, Exercise **sol, int n, int start, struct Node *h);
-Exercise **perm_sempl(int pos, Exercise **val, Exercise **sol, int *mark, int n, Exercise **result);
-void printList(struct Node *h);
 
-struct Node *disp_ripet(int pos, Exercise **val, Exercise **sol, int n, int k, struct Node *h);
-
+struct Node *disp_ripetExercise(int pos, Exercise **val, Exercise **sol, int n, int k, struct Node *h);
+int disp_ripet(int pos, struct Node **val, struct Node **sol, int n, int k, struct Node **bestSol, float valBestSol);
 
 int main(void){
   FILE *infile = fopen("elementi.txt", "r");
@@ -28,81 +20,70 @@ int main(void){
   fscanf(infile, "%d", &lenFile);
 
   e = readFile(infile, lenFile);
-  // printExercises(e, lenFile);
+  //printExercises(e, lenFile);
+  // fino a qui funziona
 
-  Exercise **sol = malloc(lenFile * sizeof(Exercise *));
+  Exercise **solExercise = malloc(lenFile * sizeof(Exercise *));
   struct Node *h = NULL;
   for(int i=1; i<6; i++)
-    h = disp_ripet(0, e, sol, lenFile, i, h);
-  printList(h);
-  int *mark = malloc(5*sizeof(int));
-  Exercise **result = malloc(5*sizeof(Exercise *));
+    h = disp_ripetExercise(0, e, solExercise, lenFile, i, h);
+  // printList(h);
 
-  //for(struct Node *x=h; x!=NULL; x=x->next){
-  //  if(countMinDiffDiag(x->e, x->lenE) <= DD){
-  //    perm_sempl(0, x->e, sol, mark, x->lenE, result);
-  //  }
-  //}
+  int lenList;
+  lenList = getLenLinkedList(h);
+  //printf("lenLinkedList: %d", lenList);
+  //fino a qui funziona
 
+  struct Node **vett=allocateVett(lenList);
+
+  vett = createVett(h, vett);
+  // printVett(vett, lenList);
+  // fino a qui il vettore e giusto
+
+  struct Node **solVett = allocateVett(lenList);
+  struct Node **bestSol = allocateVett(LEND);
+  int valueBestSol=0;
+  int maxVal = disp_ripet(0, vett, solVett, lenList, LEND, bestSol, valueBestSol);
 
   return 0;
 }
 
-struct Node *newNode(Exercise **e, int lenE, struct Node *h){
-  struct Node *x = malloc(sizeof(struct Node));
-
-  if(x == NULL){
-    return NULL;
-  }
-
-  x->e = malloc(lenE*sizeof(Exercise *));
-
-  for(int i=0; i<lenE; i++)
-    x->e[i] = e[i];
-  x->lenE = lenE;
-  x->next = h;
-  return x;
-}
-
-void printList(struct Node *h){
-  for(struct Node *x=h; x!=NULL; x = x->next){
-    printf("%d\n", x->lenE);
-    printExercises(x->e, x->lenE);
-  }
-}
 
 
-Exercise **perm_sempl(int pos, Exercise **val, Exercise **sol, int *mark, int n, Exercise **result) {
-  int i;
-  if (pos >= n) {
-     printExercises(sol, pos);
-     printf("\n");
-    return result;
-  }
 
-  for (i=0; i<n; i++)
-    if (mark[i] == 0){
-      if((pos == 0 && getEntry(val[i]) == 1) || (pos > 0 && getOut(sol[pos-1]) == getEntry(val[i]))){
-        mark[i] = 1;
-        sol[pos] = val[i];
-        result = perm_sempl(pos+1, val, sol, mark, n, result);
-        mark[i] = 0;
-      }
-    }
-  return result;
-}
-
-struct Node *disp_ripet(int pos, Exercise **val, Exercise **sol, int n, int k, struct Node *h) {
+struct Node *disp_ripetExercise(int pos, Exercise **val, Exercise **sol, int n, int k, struct Node *h) {
   int i;
   if (pos >= k) {
-    if(countMinDiffDiag(sol, pos) < DD && checkAcro(sol, pos) > 0)
-      h = newNode(sol, pos, h);
+    int diff = countDiffDiag(sol, pos);
+    if(diff < DD && checkAcro(sol, pos) > 0)
+      h = newNode(sol, pos, diff, h);
     return h;
   }
   for (i = 0; i < n; i++) 
     if((pos == 0 && getEntry(val[i]) == 1) || (pos > 0 && getOut(sol[pos-1]) == getEntry(val[i]))){
       sol[pos] = val[i];
-      h = disp_ripet(pos+1, val, sol, n, k, h);
+      h = disp_ripetExercise(pos+1, val, sol, n, k, h);
     }
   return h;
 }
+
+int disp_ripet(int pos, struct Node **val, struct Node **sol, int n, int k, struct Node **bestSol, float valBestSol) {
+  int i;
+  if (pos >= k) {
+    float valSol=countValueDiag(sol);
+    if(checkProgDiff(sol) > 0 && valSol>valBestSol && checkAcroProg(sol) > 0 && checkAcroSeq(sol) > 0 ){
+      for(int i=0; i<LEND; i++)
+        bestSol[i] = sol[i];
+      valBestSol = valSol;
+      printf("value: %f\n", valSol);
+      printVett(sol, k);
+     }
+    return valBestSol;
+  }
+  for (i = 0; i < n; i++) {
+    sol[pos] = val[i];
+    valBestSol = disp_ripet(pos+1, val, sol, n, k, bestSol, valBestSol);
+  }
+  return valBestSol;
+}
+

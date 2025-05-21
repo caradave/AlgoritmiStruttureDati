@@ -43,6 +43,7 @@ void printExercises(Exercise **e, int len){
     }else
       printf("%s %d %d %d %d %d %.2f %d\n", e[i]->name, e[i]->type, e[i]->entry, e[i]->out, e[i]->prec, e[i]->final, e[i]->val, e[i]->diff);
   }
+  printf("\n");
 }
 
 int getEntry(Exercise *e){
@@ -84,10 +85,22 @@ int checkAcro(Exercise **e, int len){
   return 1;
 }
 
-int countMinDiffDiag(Exercise **e, int len){
+int countDiffDiag(Exercise **e, int len){
   int sum=0;
   for(int i=0; i<len; i++){
     sum += getDifficulty(e[i]);
   }
   return sum;
+}
+
+float getValue(Exercise *e){
+  return e->val;
+}
+
+int getFinal(struct Exercise *e){
+  return e->final;
+}
+
+int getPrec(struct Exercise *e){
+  return e->prec;
 }
