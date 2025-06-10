@@ -12,10 +12,9 @@ typedef struct Edge{
   char IDrete[MAXC];
 } Edge;
 
-struct Edge edgeCreate(char nome[], char IDrete[]);
-char *getWeight(struct Edge e);
-int edgeCompare(struct Edge e1, struct Edge e2);
-int initSymbolTab(struct Edge *e, FILE *inF);
-int getIndexEdge(struct Edge *e, struct Edge e1, int len);
+int checkNotInList(Edge *eList, Edge e, int len);
+int edgesList(Edge **e, FILE *infile, int count);
+void printEdges(Edge **e, int len);
+void printEdge(struct Edge *e);
 
 #endif

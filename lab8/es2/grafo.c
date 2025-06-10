@@ -1,48 +1,36 @@
 #include "grafo.h"
 
-typedef struct Node{
-  int v;
-  int weight;
-  struct Node *next;
-} Node;
 
-struct Grafo grafoInit(){
-  struct Grafo g;
+struct Grafo *grafoInit(){
 
-  g.numV = 0;
-  g.numA = 0;
-  g.matA = NULL;
-  g.listaA = NULL;
-  g.symbolTab = NULL;
+  Grafo *g = malloc(sizeof(struct Grafo));
 
+  g->numV = 0;
+  g->numE = 0;
+  g->mat = NULL;
+  g->e = NULL;
   return g;
 }
 
-int **allocateMat(int dim){
-  int **mat = malloc(dim * sizeof(int *));
+int **allocaMat(int len){
+  int **mat = malloc(len*sizeof(int *));
 
-  for(int i=0; i<dim; i++)
-    mat[i] = malloc(dim * sizeof(int));
+  for(int i=0; i<len; i++)
+    mat[i] = malloc(len*sizeof(int));
 
   return mat;
 }
 
-void readFile(FILE *inF){
-  char nome1[MAXC], IDrete1[MAXC], nome2[MAXC], IDrete2[MAXC];
-  int weight;
-
-  FILE *file = inF;
-
-  struct Grafo g = grafoInit();
-
-  g.numV = initSymbolTab(g.symbolTab, file);
+void readFile(FILE *infile){
+  Grafo *g = grafoInit();
   
-  g.matA = allocateMat(g.numV);
-
-  while(fscanf(inF, "%s %s %s %s %d\n", nome1, IDrete1, nome2, IDrete2, &weight)){
-    int x=getIndexEdge(g.symbolTab, edgeCreate(nome1, IDrete1), g.numV);
-    int y = getIndexEdge(g.symbolTab, edgeCreate(nome2, IDrete2), g.numV);
-    g.matA[x][y] = weight;
-    g.numA++;
+  if(infile == NULL){
+    printf("impossibile eseguire azioni sul file");
+    return;
   }
+
+  FILE *edgeF = infile;
+  Edge **e;
+  g->numE = edgesList(e, edgeF, g->numE);
+  printEdges(e, g->numE);
 }

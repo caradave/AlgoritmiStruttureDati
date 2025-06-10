@@ -6,15 +6,12 @@
 
 #include "edge.h"
 
-typedef struct Node Node;
-
 typedef struct Grafo{
   int numV;
-  int numA;
-  int **matA;
-  struct Node *listaA;
-  Edge *symbolTab;
+  int numE;
+  int **mat;
+  Edge **e;
 } Grafo;
 
-struct Grafo grafoInit();
+void readFile(FILE *infile);
 #endif

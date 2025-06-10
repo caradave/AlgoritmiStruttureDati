@@ -1,60 +1,54 @@
 #include "edge.h"
 
-struct Edge edgeCreate(char nome[], char IDrete[]){
-  struct Edge e;
+Edge edgeCreate(char *nome, char *id){
+  Edge e;
 
   strcpy(e.nome, nome);
-  strcpy(e.IDrete, IDrete);
+  strcpy(e.IDrete, id);
 
   return e;
 }
 
-char *getNome(struct Edge e){
-  return (e.nome);
-}
-
-char *getIDrete(struct Edge e){
-  return e.IDrete;
-}
-
-int edgeNotInList(struct Edge *e, struct Edge e1, int len){
+int checkNotInList(Edge *eList, Edge e, int len){
+  printf("valore len: %d\n", len);
   for(int i=0; i<len; i++)
-    if(edgeCompare(e[i], e1))
-      return -1;
-  return 1;
+    if(strcmp(eList[i].nome, e.nome) == 0)
+      return 1;
+  return 0;
 }
 
-int initSymbolTab(struct Edge *e, FILE *inF){
-  int count=0;
+int edgesList(Edge **e, FILE *infile, int count){
+  char nome1[MAXC], id1[MAXC], nome2[MAXC], id2[MAXC];
+  int peso;
+  count=0;
 
-  char nome1[MAXC], IDrete1[MAXC], nome2[MAXC], IDrete2[MAXC];
-  int val;
+  while(fscanf(infile, "%s %s %s %s %d\n", nome1, id1, nome2, id2, &peso) != EOF)
+    count++;
 
-  while(fscanf(inF, "%s %s %s %s %d", nome1, IDrete1, nome2, IDrete2, &val) != EOF){
-    if(edgeNotInList(e, edgeCreate(nome1, IDrete1), count) == 1){
+  *e = malloc((count*2)*sizeof(struct Edge));
+
+  rewind(infile);
+  count = 0;
+  struct Edge e1;
+
+
+  while(fscanf(infile, "%s %s %s %s %d\n", nome1, id1, nome2, id2, &peso) != EOF){
+    strcpy(e1.nome, nome1);
+    strcpy(e1.IDrete, id1);
+    if(checkNotInList(*e, e1, count) == 0){
+      *(e)[count] = edgeCreate(nome1, id1);
       count++;
-      e = realloc(e, count*sizeof(struct Edge));
-      e[count] = edgeCreate(nome1, IDrete1);
-    }
-    if(edgeNotInList(e, edgeCreate(nome2, IDrete2), count) == 1){
-      count++;
-      e = realloc(e, count*sizeof(struct Edge));
-      e[count] = edgeCreate(nome2, IDrete2);
     }
   }
+
   return count;
 }
 
-int edgeCompare(struct Edge e1, struct Edge e2){
-  if(strcmp(e1.nome, e2.nome) == 1 && strcmp(e1.IDrete, e2.IDrete) == 1)
-    return 1;
-  return -1;
-}
-
-int getIndexEdge(struct Edge *e, struct Edge e1, int len){
+void printEdges(struct Edge *e, int len){
   for(int i=0; i<len; i++)
-    if(edgeCompare(e[i], e1) == 1)
-      return i;
-  return -1;
+    printf("%s %s\n", (e)[i].nome, &(e)[i].IDrete);
 }
 
+void printEdge(struct Edge *e){
+  printf("%s %s\n", e->nome, e->IDrete);
+}
