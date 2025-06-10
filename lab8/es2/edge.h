@@ -12,9 +12,11 @@ typedef struct Edge{
   char IDrete[MAXC];
 } Edge;
 
-int checkNotInList(Edge *eList, Edge e, int len);
-int edgesList(Edge **e, FILE *infile, int count);
-void printEdges(Edge **e, int len);
+int checkInList(Edge *eList, Edge e, int len);
+int edgesList(Edge *e, FILE *infile, int count);
+void printEdges(Edge *e, int len);
 void printEdge(struct Edge *e);
+int getPos(Edge *e, Edge e1, int len);
+Edge edgeCreate(char *nome, char *id);
 
 #endif

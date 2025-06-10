@@ -10,8 +10,12 @@ int main(void){
     printf("impossibile aprire il file");
     return -1;
   } 
-  readFile(infile);
-
+  Grafo *g = readFile(infile);
+  printEdgesList(g->e, g->numE);
+  printMat(g->mat, g->numE);
+  
+  g = createListaAd(g);
+  sortAndPrint(g);
   fclose(infile);
   return 0;
 }
