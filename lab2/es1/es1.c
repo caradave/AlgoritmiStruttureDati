@@ -7,7 +7,7 @@ int gcd(int a, int b);
 int main(void){
   int a, b;
   srand(time(NULL));
-  
+
   for(int i=0; i<10; i++){
     a = rand()%30;
     b = rand()%30;
