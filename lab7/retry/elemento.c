@@ -52,6 +52,10 @@ int getAcro(Elemento *e){
   return e->type;
 }
 
+int getEnding(Elemento *e){
+  return e->ending;
+}
+
 int checkEnding(Elemento *e){
   return e->ending;
 }

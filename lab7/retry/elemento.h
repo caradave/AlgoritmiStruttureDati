@@ -17,6 +17,7 @@ void printVettoreElementi(Elemento **e, int len);
 float getPoints(Elemento *e);
 int getDiff(Elemento *e);
 int getAcro(Elemento *e);
+int getEnding(Elemento *e);
 int checkEntryOut(Elemento *e1, Elemento *e2);
 int checkFirstEntry(Elemento *e);
 int checkPrec(Elemento *e);

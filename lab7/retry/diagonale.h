@@ -14,6 +14,7 @@ void distruggiDiag(Diagonale *d);
 float calcolaPunteggio(Diagonale *d);
 int calcolaDiff(Diagonale *d);
 int checkAcro(Diagonale *d);
+int checkLast(Diagonale *d);
 void printDiagonale(Diagonale *d);
 
 #endif

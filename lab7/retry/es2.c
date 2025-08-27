@@ -3,18 +3,30 @@
 #include "elemento.h"
 #include "diagonale.h"
 
+typedef struct DiagonaliFinali{
+  Diagonale **d;
+  int numDiagonali;
+  int maxDiagonaliDisp;
+} DiagonaliFinali;
+
 Elemento **readFile(FILE *inF);
-int disp_ripet(int pos, Elemento **val, Diagonale *sol, int n, int k, int count, int dd);
+int disp_ripet(int pos, Elemento **val, Diagonale *sol, int n, int k, int count, int dd, DiagonaliFinali *dFin);
 
 int main(void){
   FILE *infile = fopen("elementi.txt", "r");
   
   Elemento **e = readFile(infile);
   // printVettoreElementi(e, 19);
+  DiagonaliFinali *dFin = malloc(sizeof(DiagonaliFinali));
+  dFin->d = malloc(300*sizeof(Diagonale *));
+  for(int i=0; i<300; i++)
+    dFin->d[i] = creaDiag();
+  dFin->maxDiagonaliDisp = 300;
+  dFin->numDiagonali = 0;
 
   Diagonale *d = creaDiag();
   for(int i=1; i<=5; i++)
-    disp_ripet(0, e, d, 19, i, 0, 10);
+    disp_ripet(0, e, d, 19, i, 0, 10, dFin);
 
   fclose(infile);
   return 0;
@@ -35,12 +47,31 @@ Elemento **readFile(FILE *inF){
   return e;
 }
 
-int disp_ripet(int pos, Elemento **val, Diagonale *sol, int n, int k, int count, int dd){
-  if(pos >= k || (pos > 0 && checkEnding(sol->e[pos-1]) == 1)){
+int disp_ripet(int pos, Elemento **val, Diagonale *sol, int n, int k, int count, int dd, DiagonaliFinali *dFin){
+  if(pos >= k  /*pos > 0 && checkEnding(sol->e[pos-1]) == 1*/){
     sol->numElem = k;
-    if(checkAcro(sol)){
-      printDiagonale(sol);
-      printf("difficolta: %d", calcolaDiff(sol));
+    if(checkAcro(sol) && checkLast(sol) == 1){
+
+      dFin->numDiagonali += 1;
+      if(dFin->maxDiagonaliDisp == dFin->numDiagonali){
+        dFin->d = realloc(dFin->d, (dFin->maxDiagonaliDisp*2+dFin->numDiagonali)* sizeof(Diagonale *));
+
+        if(dFin == NULL){
+          printf("impossibile riallocare\n");
+          exit -1;
+        }
+      }
+
+      dFin->d[dFin->numDiagonali - 1] = creaDiag();
+      dFin->d[dFin->numDiagonali-1]->numElem = k;
+
+      for(int i=0; i<sol->numElem; i++){
+        dFin->d[dFin->numDiagonali-1][i] = sol[i];
+      }
+
+      printf("numDiagonali: %d\n", dFin->numDiagonali);
+      printDiagonale(dFin->d[dFin->numDiagonali -1]);
+      printf("difficolta: %d", calcolaDiff(dFin->d[dFin->numDiagonali -1]));
       printf("\n\n\n");
     }
     return count;
@@ -48,9 +79,9 @@ int disp_ripet(int pos, Elemento **val, Diagonale *sol, int n, int k, int count,
 
   for(int i=0; i<n; i++){
     sol->numElem = pos;
-    if(((pos == 0 && checkFirstEntry(val[i]) && checkPrec(val[i])) || (pos != 0 && checkEntryOut(sol->e[pos-1], val[i]))) && (calcolaDiff(sol) + getDiff(val[i])) < dd){
+    if(((pos == 0 && checkFirstEntry(val[i]) && checkPrec(val[i])) || (pos != 0 && checkEntryOut(sol->e[pos-1], val[i]))) && (calcolaDiff(sol) + getDiff(val[i])) <= dd){
       sol->e[pos] = val[i];
-      count = disp_ripet(pos+1, val, sol, n, k, count, dd);
+      count = disp_ripet(pos+1, val, sol, n, k, count, dd, dFin);
     }
   }
 
