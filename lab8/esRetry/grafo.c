@@ -36,58 +36,83 @@ int getLenFile(FILE *inF){
   return count;
 }
 
-int addIfNotInList(char **lista, char nome[], int pos){
+int addIfNotInList(char **listaVertici, char **listaNetwork, char nome[], char network[], int pos){
   int check=0;
   for(int i=0; i<pos; i++)
-      if(strcmp(lista[i], nome) == 0)
+      if(strcmp(listaVertici[i], nome) == 0)
         check = 1;
   if(check == 0){
-    printf("inserito un nome nella lista");
-    strcpy(lista[pos], nome);
+    strcpy(listaVertici[pos], nome);
+    strcpy(listaNetwork[pos], nome);
+    pos++;
   }
-  return pos++;
+  return pos;
 }
 
-int createListaVertici(FILE *inF, char **lista, int lenF){
-  int lenFile, flusso, count=0;
+int createListaVertici(FILE *inF, char **listaVertici, char **listaNetwork, int lenF){
+  int flusso, count=0;
   char id1[MAXC], rete1[MAXC], id2[MAXC], rete2[MAXC];
-  printf("lenFile dentro la funzione: %d", lenF);
-
   
-  for(int i=0; i<lenFile; i++){
-    if(fscanf(inF, "%s %s %s %s %d", id1, rete1, id2, rete2, &flusso) != 5)
-      printf("porcodio");
-    printf("%s %s %s %s %d", id1, rete1, id2, rete2, flusso);
+  for(int i=0; i<lenF; i++){
+    // leggo il file in maniera tale che possa inserire nella lista i nomi dei vertici e dei network
+    fscanf(inF, "%s %s %s %s %d\n", id1, rete1, id2, rete2, &flusso);
     // controllo per l'ID1 e se non c'è in lista lista lo inserisco
-    count = addIfNotInList(lista, id1, count);
+    count = addIfNotInList(listaVertici, listaNetwork, id1, rete1, count);
     
     // controllo per l'ID2, se non c'è lo inserisco in lista
-    count = addIfNotInList(lista, id2, count);
-    printf("elementi in lista: %d\n", count);
+    count = addIfNotInList(listaVertici, listaNetwork, id2, rete2, count);
   }
   rewind(inF);
   return count;
 }
 
+void riempiMat(FILE *inF, Grafo *g){
+  int flusso, posID1, posID2;
+  char id1[MAXC], rete1[MAXC], id2[MAXC], rete2[MAXC]; 
+
+  while(fscanf(inF, "%s %s %s %s %d", id1, rete1, id2, rete2, &flusso) != EOF){
+    posID1 = searchHashTableByName(g->t, id1);
+    posID2 = searchHashTableByName(g->t, id2);
+    g->mat[posID1][posID2] = flusso;
+    g->mat[posID2][posID1] = flusso;
+  }
+}
+
 void readFile(FILE *inF, Grafo *g){
-  int numArchi, flusso, count=0, lenF=0;
+  int numArchi, flusso, count=0, lenF=0, pos;
   char id1[MAXC], rete1[MAXC], id2[MAXC], rete2[MAXC];
 
-  // scopro quanto è lungo il mio file
+  // scopro quanto è lungo il mio file e di conseguenza quello è il mio numero di archi
   lenF = getLenFile(inF);
-  printf("lunghezza file: %d\n", lenF);
+  g->numArchi = lenF;
 
-  // genero l'insieme diei vertici
-  char **lista = malloc(lenF*2*sizeof(char *));
-  for(int i=0; i<lenF*2; i++)
-    lista[i] = malloc(MAXC*sizeof(char));
-  int lenLista = createListaVertici(inF, lista, lenF);
-  for(int i=0; i<lenLista; i++)
-    printf("%s\n", lista[i]);
+  // genero l'insieme dei vertici, prima allocando e poi riempiendo
+  char **listaVertici = malloc(lenF*2*sizeof(char *));
+  char **listaNetwork = malloc(lenF*2*sizeof(char *));
+  for(int i=0; i<lenF*2; i++){
+    listaVertici[i] = malloc(MAXC*sizeof(char));
+    listaNetwork[i] = malloc(MAXC*sizeof(char));
+  }
 
-  Grafo *gInside = malloc(sizeof(Grafo));
-  gInside->numVertici = lenLista;
-  g->t = createHashTable(gInside->numArchi);
-  printf("%d\n", gInside->numArchi);
+  g->numVertici = createListaVertici(inF, listaVertici, listaNetwork, lenF);
 
+  // aggiorno il grafo passato per refecence e creo la HashTable
+  g->t = createHashTable(g->numVertici);
+
+  // riempio la HashTable
+  for(int i=0; i<g->numVertici; i++)
+    pos = insertHashTable(g->t, listaVertici[i], listaNetwork[i]);
+
+  // alloco la matrice delle adiacenze
+  g->mat = malloc(g->t->size*sizeof(int *));
+  for(int i=0; i<g->t->size; i++)
+    g->mat[i] = calloc(g->t->size, sizeof(int)); 
+
+  riempiMat(inF, g);
+  
+  for(int i=0; i<g->t->size; i++){
+    for(int k=0; k<g->t->size; k++)
+      printf("%d ", g->mat[i][k]);
+    printf("\n");
+  }
 }

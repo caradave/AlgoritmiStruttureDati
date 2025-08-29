@@ -8,6 +8,7 @@
 
 typedef struct Entry{
   char nome[MAXC];
+  char network[MAXC];
   int state;
 } Entry;
 
@@ -18,6 +19,9 @@ typedef struct HashTable{
 } HashTable;
 
 HashTable *createHashTable(int size);
-void insertHashTable(HashTable *ht, char nome[]);
-
+int hashCalculate(char name[], int tabDim);
+int insertHashTable(HashTable *ht, char nome[], char network[]);
+char *searchHashTableByIndex(HashTable *ht, int pos); 
+int searchHashTableByName(HashTable *ht, char nome[]);
+char *searchHashTableByIndexReturnWithNetwork(HashTable *ht, int index);
 #endif
