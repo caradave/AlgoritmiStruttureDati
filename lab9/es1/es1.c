@@ -2,7 +2,7 @@
 #include "grafo.h"
 
 int main(void){
-  FILE *inF = fopen("grafo4.txt", "r");
+  FILE *inF = fopen("grafo3.txt", "r");
 
   if(inF == NULL){
     printf("impossibile aprire il file");

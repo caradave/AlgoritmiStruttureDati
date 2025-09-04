@@ -81,7 +81,7 @@ void printGrafo(struct Grafo *g){
   printArchi(g, g->archi, g->numArchi);
 }
 
-
+/* NON FUNZIONA, CI SOLO PERSO UN GIORNO E MEZZO DI LAVORO
 int checkSol(Arco *sol, int len){
   int numVertici = len+1;
   int *inDegree = calloc(numVertici, sizeof(int));
@@ -107,7 +107,7 @@ int checkSol(Arco *sol, int len){
   free(inDegree);
   free(outDegree);
 
-  if(source != 1 || sink != 1 || in != numVertici-1 /*|| out != numVertici-1*/)
+  if(source != 1 || sink != 1 || in != numVertici-1 || out != numVertici-1)
     return 0;
   return 1;
 }
@@ -117,18 +117,56 @@ void checkR(struct Arco *sol, int *vett, int len){
 }
 
 int check(Arco *sol, int len){
-  int *vett = calloc(len+1, sizeof(int));
-
+  int *vettIn = calloc(len+1, sizeof(int));
+  int *vettOut = calloc(len+1, sizeof(int));
+  int *visited = calloc(len+1, sizeof(int));
   for(int i=0; i<len; i++){
-    vett[sol[i].w] = 1;
+    visited[sol[i].w] ++;
+    // if(visited[sol[i].v] == 0)
+      // visited[sol[i].v]++;
   }
+
+  // printf("vettore degli outDegree\n");
+  // for(int i=0; i<len+1; i++)
+   // printf("%d ", vettOut[i]);
+  printf("vettore visited\n ");
+  for(int i=0; i<len+1; i++)
+    printf("%d ", visited[i]);
+
+  printf("\n");
+
+
+  for(int i=0; i<len+1; i++)
+    if(vettOut[i] != 1 || vettIn[i] != 1){
+      free(vettOut);
+      free(vettIn);
+      return 0;
+    }
+
+  return 1;
+}*/
+
+void DfsR(struct Grafo *g, int *time, int *pre, int *post){
+
+}
+
+void GraphDfs(struct Grafo *g, Arco Sol, int k){
+  int *pre = malloc(g->numVertici*sizeof(int));
+  int time = 0;
+
+  for(int i=0; i<g->numVertici; i++)
+    pre[i] = -1;
+
+  DfsR(g, &time, pre);
 }
 
 void comb_sempl(int pos, Arco *val, Arco *sol, int n, int k, int start, Archi *finalSol, struct Grafo *g) {
   int i;
   if (pos >= k) {
-    int check = checkSol(sol, k);
-    if(check == 1){
+    printArchi(g, sol, k);
+    int checkSol = check(sol, k);
+    printf("valore check: %d\n\n", checkSol);
+    if(checkSol == 1){
       printArchi(g, sol, k);
       printf("\n\n");
     }
@@ -145,7 +183,7 @@ Archi *creaDag(struct Grafo *g){
   Arco *sol = malloc((g->numVertici-1)*sizeof(Arco));
   Archi *finalSol;
 
-  printf("sono qui\n");
+
   
   comb_sempl(0, g->archi, sol, g->numArchi, g->numVertici-1, 0, finalSol, g);
 
